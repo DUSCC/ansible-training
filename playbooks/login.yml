@@ -1,0 +1,17 @@
+---
+# file: playbooks/login.yml
+
+- name: Configure login node
+  hosts: login
+  become: true
+  tasks:
+    # create a few tasks that do the following: installs NFSv3, exports it to the other VMs
+    # see https://linuxconfig.org/how-to-configure-nfs-on-linux
+    - name: Install nfs
+      apt:
+        name: ...
+      # fill in here
+
+    - name: ...
+      # fill in here
+

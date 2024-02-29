@@ -1,0 +1,17 @@
+---
+# file: playbooks/compute.yml
+
+- name: Configure compute node
+  hosts: compute
+  become: true
+  tasks:
+    # create a few tasks that do the following: installs NFSv3, mounts it from the login node
+    # see https://linuxconfig.org/how-to-configure-nfs-on-linux
+    - name: Install nfs
+      apt:
+        name: ...
+      # fill in here
+
+    - name: ...
+      # fill in here
+

@@ -6,6 +6,7 @@
   become: true
   tasks:
     # create a few tasks that do the following: installs NFSv3, mounts it from the login node
+    # also install openmpi 
     # see https://linuxconfig.org/how-to-configure-nfs-on-linux
     - name: Install nfs
       apt:

@@ -1,3 +1,3 @@
 provision-%:
-	@ansible-playbook --ask-become-pass playbooks/$*.yml -i inventory.ini
+	@ansible-playbook --ask-become-pass --ask-pass playbooks/$*.yml -i inventory.ini
 

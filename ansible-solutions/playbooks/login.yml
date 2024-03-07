@@ -1,0 +1,47 @@
+---
+# file: playbooks/login.yml
+
+- name: Configure login node
+  hosts: login
+  become: true
+  tasks:
+    - name: Install nfs and openmpi
+      apt:
+        name: 
+          - nfs-common
+          - nfs-kernel-server
+          - build-essential
+          - openmpi-bin
+          - openmpi-doc
+          - libopenmpi-dev
+
+    - name: Start and enable required services
+      systemd:
+        name: nfs-server
+        state: started
+        enabled: true
+
+    - name: Ensure NFS export paths exist
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: '0755'
+        owner: root
+        group: root
+      with_items:
+        - "/apps"
+        - "/home"
+    
+    - name: Export filesystems
+      copy:
+        dest: /etc/exports
+        owner: root
+        group: root
+        mode: '0644'
+        content: |
+          /apps *(rw,async,no_subtree_check,no_root_squash)
+          /home *(rw,async,no_subtree_check,no_root_squash)
+
+    - name: Export filesystems immediately
+      command: exportfs -ra
+

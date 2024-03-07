@@ -1,0 +1,53 @@
+---
+# file: playbooks/compute.yml
+
+- name: Configure compute node
+  hosts: compute
+  become: true
+  vars:
+    nfs_mounts:
+      - nfs_server: "login"
+        nfs_share: "/home"
+        mount_point: "/home"
+      - nfs_server: "login"
+        nfs_share: "/apps"
+        mount_point: "/apps"
+
+  tasks:
+    - name: Set hostname
+      hostname:
+        name: "{{ inventory_hostname }}"
+
+    - name: Install nfs and openmpi
+      apt:
+        name: 
+          - nfs-common
+          - build-essential
+          - openmpi-bin
+          - openmpi-doc
+          - libopenmpi-dev
+
+    - name: Ensure NFS export paths exist
+      file:
+        path: "{{ item.mount_point }}"
+        state: directory
+        mode: '0755'
+        owner: root
+        group: root
+      loop: "{{ nfs_mounts }}"
+
+    - name: Add NFS mount to /etc/fstab
+      lineinfile:
+        path: /etc/fstab
+        line: "{{ item.nfs_server }}:{{ item.nfs_share }} {{ item.mount_point }} nfs defaults 0 0"
+        state: present
+      loop: "{{ nfs_mounts }}"
+
+    - name: Mount NFS share
+      mount:
+        path: "{{ item.mount_point }}"
+        src: "{{ item.nfs_server }}:{{ item.nfs_share }}"
+        fstype: nfs
+        state: mounted
+      loop: "{{ nfs_mounts }}"
+

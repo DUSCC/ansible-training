@@ -23,14 +23,14 @@
 
     - name: Ensure NFS export paths exist
       file:
-        path: "{{ item.path }}"
+        path: "{{ item }}"
         state: directory
         mode: '0755'
         owner: root
         group: root
       with_items:
-        - apps
-        - home
+        - "/apps"
+        - "/home"
     
     - name: Export filesystems
       copy:

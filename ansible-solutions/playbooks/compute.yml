@@ -4,15 +4,50 @@
 - name: Configure compute node
   hosts: compute
   become: true
-  tasks:
-    # create a few tasks that do the following: installs NFSv3, mounts it from the login node
-    # also install openmpi 
-    # see https://linuxconfig.org/how-to-configure-nfs-on-linux
-    - name: Install nfs
-      apt:
-        name: ...
-      # fill in here
+  vars:
+    nfs_mounts:
+      - nfs_server: "login"
+        nfs_share: "/home"
+        mount_point: "/home"
+      - nfs_server: "login"
+        nfs_share: "/apps"
+        mount_point: "/apps"
 
-    - name: ...
-      # fill in here
+  tasks:
+    - name: Set hostname
+      hostname:
+        name: "{{ inventory_hostname }}"
+
+    - name: Install nfs and openmpi
+      apt:
+        name: 
+          - nfs-common
+          - build-essential
+          - openmpi-bin
+          - openmpi-doc
+          - libopenmpi-dev
+
+    - name: Ensure NFS export paths exist
+      file:
+        path: "{{ item.mount_point }}"
+        state: directory
+        mode: '0755'
+        owner: root
+        group: root
+      loop: "{{ nfs_mounts }}"
+
+    - name: Add NFS mount to /etc/fstab
+      lineinfile:
+        path: /etc/fstab
+        line: "{{ item.nfs_server }}:{{ item.nfs_share }} {{ item.mount_point }} nfs defaults 0 0"
+        state: present
+      loop: "{{ nfs_mounts }}"
+
+    - name: Mount NFS share
+      mount:
+        path: "{{ item.mount_point }}"
+        src: "{{ item.nfs_server }}:{{ item.nfs_share }}"
+        fstype: nfs
+        state: mounted
+      loop: "{{ nfs_mounts }}"
 
